@@ -17,7 +17,7 @@ fi
 
 if [ ! -d "harfbuzz" ]
 then
-  git clone https://github.com/harfbuzz/harfbuzz.git --depth=1 -b 8.3.0
+  git clone https://github.com/harfbuzz/harfbuzz.git --depth=1 -b 14.3.1
 fi
 
 API_LEVEL=21
@@ -53,10 +53,9 @@ do
   export CC="${TOOLCHAIN}/bin/${TARGET}${API_LEVEL}-clang"
   export CXX="${TOOLCHAIN}/bin/${TARGET}${API_LEVEL}-clang++"
 
-  # Locate freetype prebuilt
+  ZLIB_PREBUILT=$($READLINK -f ../prebuilt/zlib)
+  LIBPNG_PREBUILT=$($READLINK -f ../prebuilt/libpng)
   FREETYPE_PREBUILT=$($READLINK -f ../prebuilt/freetype)
-  export PKG_CONFIG_PATH="${FREETYPE_PREBUILT}/lib/${ABI}/pkgconfig"
-  export PKG_CONFIG_LIBDIR="${FREETYPE_PREBUILT}/lib/${ABI}/pkgconfig"
 
   # Create cross-file for this ABI
   user_config="meson-cross-${ABI}.txt"
@@ -67,11 +66,10 @@ c = '$CC'
 cpp = '$CXX'
 ar = '$AR'
 strip = '$STRIP'
-pkgconfig = 'pkg-config'
+pkg-config = 'pkg-config'
 
 [properties]
-c_link_args = ['-Wl,-z,max-page-size=16384']
-cpp_link_args = ['-Wl,-z,max-page-size=16384']
+pkg_config_libdir = ['${FREETYPE_PREBUILT}/lib/${ABI}/pkgconfig', '${ZLIB_PREBUILT}/lib/${ABI}/pkgconfig', '${LIBPNG_PREBUILT}/lib/${ABI}/pkgconfig']
 
 [host_machine]
 system = 'android'
@@ -85,7 +83,7 @@ EOF
     echo "Building harfbuzz for ${ABI}..."
     cd harfbuzz
     rm -rf "build-${ABI}"
-    meson setup "build-${ABI}" --cross-file "../meson-cross-${ABI}.txt" --prefix="${PREFIX}" --libdir="lib/${ABI}" --default-library=static -Dtests=disabled -Ddocs=disabled -Dfreetype=enabled
+    meson setup "build-${ABI}" --cross-file "../meson-cross-${ABI}.txt" --prefix="${PREFIX}" --libdir="lib/${ABI}" --default-library=static -Dtests=disabled -Ddocs=disabled -Dfreetype=enabled  -Dsubset=disabled -Draster=disabled -Dvector=disabled -Dgpu=disabled -Dutilities=disabled
     ninja -C "build-${ABI}" install
     cd ..
   else
