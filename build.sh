@@ -17,7 +17,7 @@ fi
 
 if [ ! -d "harfbuzz" ]
 then
-  git clone https://github.com/harfbuzz/harfbuzz.git --depth=1 -b 14.3.1
+  git clone https://github.com/harfbuzz/harfbuzz.git --depth=1 -b 15.0.0
 fi
 
 API_LEVEL=21
